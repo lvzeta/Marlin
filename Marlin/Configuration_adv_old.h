@@ -30,7 +30,7 @@
  *
  * Basic settings can be found in Configuration.h
  */
-#define CONFIGURATION_ADV_H_VERSION 020008
+#define CONFIGURATION_ADV_H_VERSION 020007
 
 //===========================================================================
 //============================= Thermal Settings ============================
@@ -186,8 +186,8 @@
  * THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-  #define THERMAL_PROTECTION_PERIOD 60        // Seconds
-  #define THERMAL_PROTECTION_HYSTERESIS 10    // Degrees Celsius
+  #define THERMAL_PROTECTION_PERIOD 40        // Seconds
+  #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
 
   //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
   #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
@@ -214,13 +214,13 @@
  * Thermal Protection parameters for the bed are just as above for hotends.
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
-  #define THERMAL_PROTECTION_BED_PERIOD        60 // Seconds
-  #define THERMAL_PROTECTION_BED_HYSTERESIS     5 // Degrees Celsius
+  #define THERMAL_PROTECTION_BED_PERIOD        20 // Seconds
+  #define THERMAL_PROTECTION_BED_HYSTERESIS     2 // Degrees Celsius
 
   /**
    * As described above, except for the bed (M140/M190/M303).
    */
-  #define WATCH_BED_TEMP_PERIOD               180 // Seconds
+  #define WATCH_BED_TEMP_PERIOD                60 // Seconds
   #define WATCH_BED_TEMP_INCREASE               2 // Degrees Celsius
 #endif
 
@@ -311,7 +311,7 @@
  * Enable Autotemp Mode with M104/M109 F<factor> S<mintemp> B<maxtemp>.
  * Disable by sending M104/M109 with no F parameter (or F0 with AUTOTEMP_PROPORTIONAL).
  */
-//#define AUTOTEMP
+#define AUTOTEMP
 #if ENABLED(AUTOTEMP)
   #define AUTOTEMP_OLDWEIGHT    0.98
   // Turn on AUTOTEMP on M104/M109 by default using proportions set here
@@ -783,7 +783,7 @@
 
   // On a 300mm bed a 5% grade would give a misalignment of ~1.5cm
   #define G34_MAX_GRADE              5    // (%) Maximum incline that G34 will handle
-  #define Z_STEPPER_ALIGN_ITERATIONS 3    // Number of iterations to apply during alignment
+  #define Z_STEPPER_ALIGN_ITERATIONS 5    // Number of iterations to apply during alignment
   #define Z_STEPPER_ALIGN_ACC        0.02 // Stop iterating early if the accuracy is better than this
   #define RESTORE_LEVELING_AFTER_G34      // Restore leveling after G34 is done?
   // After G34, re-home Z (G28 Z) or just calculate it from the last probe heights?
@@ -1048,10 +1048,10 @@
 
 // @section lcd
 
-#if EITHER(IS_ULTIPANEL, EXTENSIBLE_UI)
+#if EITHER(ULTIPANEL, EXTENSIBLE_UI)
   #define MANUAL_FEEDRATE { 50*60, 50*60, 4*60, 2*60 } // (mm/min) Feedrates for manual moves along X, Y, Z, E from panel
   #define SHORT_MANUAL_Z_MOVE 0.025 // (mm) Smallest manual Z move (< 0.1mm)
-  #if IS_ULTIPANEL
+  #if ENABLED(ULTIPANEL)
     #define MANUAL_E_MOVES_RELATIVE // Display extruder move distance rather than "position"
     #define ULTIPANEL_FEEDMULTIPLY  // Encoder sets the feedrate multiplier on the Status Screen
   #endif
@@ -1164,7 +1164,7 @@
 
   // The standard SD detect circuit reads LOW when media is inserted and HIGH when empty.
   // Enable this option and set to HIGH if your SD cards are incorrectly detected.
-  #define SD_DETECT_STATE LOW
+  //#define SD_DETECT_STATE HIGH
 
   //#define SDCARD_READONLY                 // Read-only SD card (to save over 2K of flash)
 
@@ -1603,7 +1603,7 @@
  *
  * Warning: Does not respect endstops!
  */
-#define BABYSTEPPING
+//#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define INTEGRATED_BABYSTEPPING         // EXPERIMENTAL integration of babystepping into the Stepper ISR
   //#define BABYSTEP_WITHOUT_HOMING
@@ -1665,12 +1665,12 @@
  * Override if the automatically selected points are inadequate.
  */
 #if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
-  #define PROBE_PT_1_X 20
-  #define PROBE_PT_1_Y 160
-  #define PROBE_PT_2_X 20
-  #define PROBE_PT_2_Y 10
-  #define PROBE_PT_3_X 180
-  #define PROBE_PT_3_Y 10
+  //#define PROBE_PT_1_X 15
+  //#define PROBE_PT_1_Y 180
+  //#define PROBE_PT_2_X 15
+  //#define PROBE_PT_2_Y 20
+  //#define PROBE_PT_3_X 170
+  //#define PROBE_PT_3_Y 20
 #endif
 
 /**
@@ -1791,7 +1791,7 @@
 //
 // G2/G3 Arc Support
 //
-//#define ARC_SUPPORT               // Disable this feature to save ~3226 bytes
+#define ARC_SUPPORT                 // Disable this feature to save ~3226 bytes
 #if ENABLED(ARC_SUPPORT)
   #define MM_PER_ARC_SEGMENT      1 // (mm) Length (or minimum length) of each arc segment
   //#define ARC_SEGMENTS_PER_R    1 // Max segment length, MM_PER = Min
@@ -2261,20 +2261,14 @@
 #if HAS_TRINAMIC_CONFIG
 
   #define HOLD_MULTIPLIER    0.5  // Scales down the holding current from run current
-
-  /**
-   * Interpolate microsteps to 256
-   * Override for each driver with <driver>_INTERPOLATE settings below
-   */
-  #define INTERPOLATE      true
+  #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
   #if AXIS_IS_TMC(X)
     #define X_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
     #define X_CURRENT_HOME  X_CURRENT  // (mA) RMS current for sensorless homing
-    #define X_MICROSTEPS     16        // 0..256
+    #define X_MICROSTEPS     16    // 0..256
     #define X_RSENSE          0.11
-    #define X_CHAIN_POS      -1        // -1..0: Not chained. 1: MCU MOSI connected. 2: Next in chain, ...
-    //#define X_INTERPOLATE  true      // Enable to override 'INTERPOLATE' for the X axis
+    #define X_CHAIN_POS      -1    // <=0 : Not chained. 1 : MCU MOSI connected. 2 : Next in chain, ...
   #endif
 
   #if AXIS_IS_TMC(X2)
@@ -2283,7 +2277,6 @@
     #define X2_MICROSTEPS    16
     #define X2_RSENSE         0.11
     #define X2_CHAIN_POS     -1
-    //#define X2_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(Y)
@@ -2292,7 +2285,6 @@
     #define Y_MICROSTEPS     16
     #define Y_RSENSE          0.11
     #define Y_CHAIN_POS      -1
-    //#define Y_INTERPOLATE  true
   #endif
 
   #if AXIS_IS_TMC(Y2)
@@ -2301,7 +2293,6 @@
     #define Y2_MICROSTEPS    16
     #define Y2_RSENSE         0.11
     #define Y2_CHAIN_POS     -1
-    //#define Y2_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(Z)
@@ -2310,7 +2301,6 @@
     #define Z_MICROSTEPS     16
     #define Z_RSENSE          0.11
     #define Z_CHAIN_POS      -1
-    //#define Z_INTERPOLATE  true
   #endif
 
   #if AXIS_IS_TMC(Z2)
@@ -2319,7 +2309,6 @@
     #define Z2_MICROSTEPS    16
     #define Z2_RSENSE         0.11
     #define Z2_CHAIN_POS     -1
-    //#define Z2_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(Z3)
@@ -2328,7 +2317,6 @@
     #define Z3_MICROSTEPS    16
     #define Z3_RSENSE         0.11
     #define Z3_CHAIN_POS     -1
-    //#define Z3_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(Z4)
@@ -2337,7 +2325,6 @@
     #define Z4_MICROSTEPS    16
     #define Z4_RSENSE         0.11
     #define Z4_CHAIN_POS     -1
-    //#define Z4_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E0)
@@ -2345,7 +2332,6 @@
     #define E0_MICROSTEPS    16
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
-    //#define E0_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E1)
@@ -2353,7 +2339,6 @@
     #define E1_MICROSTEPS    16
     #define E1_RSENSE         0.11
     #define E1_CHAIN_POS     -1
-    //#define E1_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E2)
@@ -2361,7 +2346,6 @@
     #define E2_MICROSTEPS    16
     #define E2_RSENSE         0.11
     #define E2_CHAIN_POS     -1
-    //#define E2_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E3)
@@ -2369,7 +2353,6 @@
     #define E3_MICROSTEPS    16
     #define E3_RSENSE         0.11
     #define E3_CHAIN_POS     -1
-    //#define E3_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E4)
@@ -2377,7 +2360,6 @@
     #define E4_MICROSTEPS    16
     #define E4_RSENSE         0.11
     #define E4_CHAIN_POS     -1
-    //#define E4_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E5)
@@ -2385,7 +2367,6 @@
     #define E5_MICROSTEPS    16
     #define E5_RSENSE         0.11
     #define E5_CHAIN_POS     -1
-    //#define E5_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E6)
@@ -2393,7 +2374,6 @@
     #define E6_MICROSTEPS    16
     #define E6_RSENSE         0.11
     #define E6_CHAIN_POS     -1
-    //#define E6_INTERPOLATE true
   #endif
 
   #if AXIS_IS_TMC(E7)
@@ -2401,7 +2381,6 @@
     #define E7_MICROSTEPS    16
     #define E7_RSENSE         0.11
     #define E7_CHAIN_POS     -1
-    //#define E7_INTERPOLATE true
   #endif
 
   /**
@@ -2492,26 +2471,10 @@
    * CHOPPER_PRUSAMK3_24V // Imported parameters from the official Průša firmware for MK3 (24V)
    * CHOPPER_MARLIN_119   // Old defaults from Marlin v1.1.9
    *
-   * Define your own with:
+   * Define you own with
    * { <off_time[1..15]>, <hysteresis_end[-3..12]>, hysteresis_start[1..8] }
    */
-  #define CHOPPER_TIMING CHOPPER_DEFAULT_12V        // All axes (override below)
-  //#define CHOPPER_TIMING_X  CHOPPER_DEFAULT_12V   // For X Axes (override below)
-  //#define CHOPPER_TIMING_X2 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_Y  CHOPPER_DEFAULT_12V   // For Y Axes (override below)
-  //#define CHOPPER_TIMING_Y2 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_Z  CHOPPER_DEFAULT_12V   // For Z Axes (override below)
-  //#define CHOPPER_TIMING_Z2 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_Z3 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_Z4 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E  CHOPPER_DEFAULT_12V   // For Extruders (override below)
-  //#define CHOPPER_TIMING_E1 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E2 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E3 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E4 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E5 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E6 CHOPPER_DEFAULT_12V
-  //#define CHOPPER_TIMING_E7 CHOPPER_DEFAULT_12V
+  #define CHOPPER_TIMING CHOPPER_DEFAULT_12V
 
   /**
    * Monitor Trinamic drivers
@@ -2995,7 +2958,7 @@
      * This allows the laser to keep in perfect sync with the planner and removes
      * the powerup/down delay since lasers require negligible time.
      */
-    //#define LASER_POWER_INLINE
+    #define LASER_POWER_INLINE
 
     #if ENABLED(LASER_POWER_INLINE)
       /**
@@ -3475,13 +3438,6 @@
 #if ENABLED(NANODLP_Z_SYNC)
   //#define NANODLP_ALL_AXIS  // Enables "Z_move_comp" output on any axis move.
                               // Default behavior is limited to Z axis only.
-#endif
-
-/**
- * Ethernet. Use M552 to enable and set the IP address.
- */
-#if HAS_ETHERNET
-  #define MAC_ADDRESS { 0xDE, 0xAD, 0xBE, 0xEF, 0xF0, 0x0D }  // A MAC address unique to your network
 #endif
 
 /**
